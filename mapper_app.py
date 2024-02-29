@@ -131,6 +131,9 @@ def main():
     st.write('Please upload the Data file')
     # Assuming upload_csv_data returns a DataFrame
     data = upload_csv_data()
+
+    with st.expander("see data uploaded"):
+        st.write(data.head())
     
     # Check if both geojson_choice has been made and data has been uploaded
     if geojson_choice and not data.empty and not gdf.empty:

@@ -81,7 +81,7 @@ def create_and_display_map(data, gdf, org_unit,data_col):
         btn = st.download_button(
             label="Download Map",
             data=file,
-            file_name="map.jpg",
+            file_name="map.html",
             mime="text/html"
         )
 

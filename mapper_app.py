@@ -63,10 +63,18 @@ def create_and_display_map(data, gdf, org_unit,data_col):
         data=data,
         columns=[org_unit, data_col],
         fill_color="YlOrRd",
-        fill_opacity=0.7,
-        line_opacity=0.2,
+        fill_opacity=0.8,
+        line_opacity=0.8,
         key_on="feature.properties.name",
     ).add_to(m)
+    overlay = folium.Rectangle(
+    bounds=[[-90, -180], [90, 180]], 
+    fill=True,
+    color='#000000',  # Black color
+    fill_color='#000000',
+    fill_opacity=0.2,  # Adjust opacity here (0 is fully transparent, 1 is fully opaque)
+    )
+    overlay.add_to(m)
     m.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]])
 
   # Save the map as an HTML file

@@ -3,6 +3,8 @@ import streamlit_folium as st_folium
 import folium
 import pandas as pd
 import geopandas as gpd
+import os
+import matplotlib.pyplot as plt
 
 def upload_csv_data():
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
@@ -28,7 +30,7 @@ def load_geojson_data():
     try:
         geojson_path = 'Geojson/District.geojson'
         gdf = gpd.read_file(geojson_path)
-        st.success("GeoJSON data imported successfully!")
+        st.success("Shape Files Uploaded!")
         return gdf
     except Exception as e:
         st.error(f"Failed to load GeoJSON data: {e}")
@@ -47,16 +49,39 @@ def create_and_display_map(data, gdf, org_unit,data_col):
         geo_data=gdf,
         data=data,
         columns=[org_unit, data_col],
+        fill_color="YlOrRd",
+        fill_opacity=0.7,
+        line_opacity=0.2,
         key_on="feature.properties.name",
     ).add_to(m)
     m.fit_bounds([[bounds[1], bounds[0]], [bounds[3], bounds[2]]])
+
+  # Save the map as an HTML file
+    map_file_path = "map.html"
+    m.save(map_file_path)
+    
+    # Display the map in the Streamlit app
     st_folium.folium_static(m)
-    return
+    
+    # Provide a download button for the map
+    with open(map_file_path, "rb") as file:
+        btn = st.download_button(
+            label="Download Map",
+            data=file,
+            file_name="map.html",
+            mime="text/html"
+        )
+
+
 
 # Main app logic
 def main():
-    st.title("Map")
-    st.info("This tool eases drawing maps as standardized by the Division of Health Information - Ministry of Health")
+    st.title("Maapu")
+    map_logo_path = 'logo.png'
+    st.image(map_logo_path, width=100)
+
+    with st.expander("See Details"):
+        st.write("This tool eases drawing maps as standardized by the Division of Health Information - Ministry of Health")
 
     gdf = load_geojson_data()
     st.write('Please upload the Data file')

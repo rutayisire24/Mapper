@@ -6,6 +6,27 @@ import geopandas as gpd
 import os
 import matplotlib.pyplot as plt
 
+def load_geojson_data(choice):
+    """
+    Load GeoJSON data based on user choice between districts and regions.
+    """
+    try:
+        if choice == 'district':
+            geojson_path = 'Geojson/District.geojson'
+        elif choice == 'region':
+            geojson_path = 'Geojson/Regions.geojson'
+        else:
+            st.error("Invalid choice. Please select either 'region' or 'district'.")
+            return gpd.GeoDataFrame()
+
+        gdf = gpd.read_file(geojson_path)
+        st.success("GeoJSON data loaded successfully!")
+        return gdf
+    except Exception as e:
+        st.error(f"Failed to load GeoJSON data: {e}")
+        return gpd.GeoDataFrame()
+    
+
 def upload_csv_data():
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file is not None:
@@ -25,16 +46,6 @@ def upload_csv_data():
     else:
         st.info("Please upload a CSV file to proceed.")
         return pd.DataFrame() # Return empty DataFrame as a placeholder
-
-def load_geojson_data():
-    try:
-        geojson_path = 'Geojson/District.geojson'
-        gdf = gpd.read_file(geojson_path)
-        st.success("Shape Files Uploaded!")
-        return gdf
-    except Exception as e:
-        st.error(f"Failed to load GeoJSON data: {e}")
-        return gpd.GeoDataFrame()  # Return empty GeoDataFrame as a placeholder
 
 def process_data(data, gdf):
     gdf['name'] = gdf['name'].str.replace("District", "", regex=False).str.strip().str.lower()
@@ -68,10 +79,9 @@ def create_and_display_map(data, gdf, org_unit,data_col):
         btn = st.download_button(
             label="Download Map",
             data=file,
-            file_name="map.html",
+            file_name="map.jpg",
             mime="text/html"
         )
-
 
 
 # Main app logic
@@ -83,21 +93,27 @@ def main():
     with st.expander("See Details"):
         st.write("This tool eases drawing maps as standardized by the Division of Health Information - Ministry of Health")
 
-    gdf = load_geojson_data()
+    geojson_choice = st.radio("Choose the GeoJSON data to use:", ('region', 'district'))
+    
+    # Assuming load_geojson_data returns a GeoDataFrame or similar
+    gdf = load_geojson_data(geojson_choice)
+    
     st.write('Please upload the Data file')
+    # Assuming upload_csv_data returns a DataFrame
     data = upload_csv_data()
     
-    if not data.empty and not gdf.empty:
+    # Check if both geojson_choice has been made and data has been uploaded
+    if geojson_choice and not data.empty and not gdf.empty:
         data, gdf = process_data(data, gdf)
         
         # Adding an empty option manually
         org_unit_options = [""] + list(data.columns)
         data_col_options = [""] + list(data.columns)
         
-        org_unit = st.selectbox("Select Organizational Unit", options=org_unit_options)
-        data_col = st.selectbox("Select Data Column", options=data_col_options)
+        org_unit = st.selectbox("Select Organizational Unit", options=org_unit_options, index=0)
+        data_col = st.selectbox("Select Data Column", options=data_col_options, index=0)
         
-        # Proceed only if selections are made
+        # Proceed only if selections are made beyond the empty option
         if org_unit and data_col:
             # Check if the selected data column is numerical or integer
             if pd.api.types.is_numeric_dtype(data[data_col]):

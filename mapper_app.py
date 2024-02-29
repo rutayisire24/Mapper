@@ -53,7 +53,7 @@ def process_data(data, gdf):
     gdf['name'] = gdf['name'].str.replace("District", "", regex=False).str.strip().str.lower()
     return data, gdf
 
-def create_and_display_map(data, gdf, org_unit,data_col):
+def create_and_display_map(data, gdf, org_unit,data_col, Palette):
 
     bounds = gdf.total_bounds
     center = [(bounds[1] + bounds[3]) / 2, (bounds[0] + bounds[2]) / 2]
@@ -62,7 +62,7 @@ def create_and_display_map(data, gdf, org_unit,data_col):
         geo_data=gdf,
         data=data,
         columns=[org_unit, data_col],
-        fill_color="YlOrRd",
+        fill_color= Palette,
         fill_opacity=0.8,
         line_opacity=0.8,
         key_on="feature.properties.name",
@@ -154,12 +154,16 @@ def main():
         org_unit = st.selectbox("Select Organizational Unit", options=org_unit_options, index=0)
         data_col = st.selectbox("Select Data Column", options=data_col_options, index=0)
         
+        palette_choice = st.selectbox(
+            'Choose a color Palette for the Map:',
+            options = [ "RdYlGn", "RdYlGn_r","Blues","Greens"],
+            index=3)
         # Proceed only if selections are made beyond the empty option
         if org_unit and data_col:
             # Check if the selected data column is numerical or integer
             if pd.api.types.is_numeric_dtype(data[data_col]):
                 if st.button("Lets Map"):
-                    create_and_display_map(data, gdf, org_unit, data_col)
+                    create_and_display_map(data, gdf, org_unit, data_col, palette_choice)
             else:
                 st.error("Error: Please choose the right column. The selected column is not of type numerical or integer.")
 

@@ -15,12 +15,14 @@ def load_geojson_data(choice):
             geojson_path = 'Geojson/District.geojson'
         elif choice == 'region':
             geojson_path = 'Geojson/Regions.geojson'
+        elif choice == 'subcounty':
+            geojson_path = 'Geojson/Subcounties.geojson'
         else:
             st.error("Invalid choice. Please select either 'region' or 'district'.")
             return gpd.GeoDataFrame()
 
         gdf = gpd.read_file(geojson_path)
-        st.success("GeoJSON data loaded successfully!")
+        st.success("GeoJSON data loaded successfully!")        
         return gdf
     except Exception as e:
         st.error(f"Failed to load GeoJSON data: {e}")
@@ -93,11 +95,39 @@ def main():
     with st.expander("See Details"):
         st.write("This tool eases drawing maps as standardized by the Division of Health Information - Ministry of Health")
 
-    geojson_choice = st.radio("Choose the GeoJSON data to use:", ('region', 'district'))
+    geojson_choice = st.radio("Choose the GeoJSON data to use:", ('region', 'district', 'subcounty'))
     
     # Assuming load_geojson_data returns a GeoDataFrame or similar
     gdf = load_geojson_data(geojson_choice)
     
+    district_list = [
+'agago', 'amuru', 'gulu city', 'gulu', 'kitgum', 'lamwo', 'nwoya', 'omoro', 'pader',
+'buhweju', 'bushenyi', 'ibanda', 'isingiro', 'kazo', 'kiruhura', 'mbarara city', 'mbarara',
+'mitooma', 'ntungamo', 'rubirizi', 'rwampara', 'sheema', 'bududa', 'bukwo', 'bulambuli',
+'kapchorwa', 'kween', 'manafwa', 'mbale city', 'mbale', 'namisindwa', 'sironko', 'budaka',
+'busia', 'butaleja', 'butebo', 'kibuku', 'pallisa', 'tororo', 'buliisa', 'hoima city', 'hoima',
+'kagadi', 'kakumiro', 'kibaale', 'kikuube', 'kiryandongo', 'masindi', 'bugiri', 'bugweri',
+'buyende', 'iganga', 'jinja city', 'jinja', 'kaliro', 'kamuli', 'luuka', 'mayuge', 'namayingo',
+'namutumba', 'kampala', 'abim', 'amudat', 'kaabong', 'karenga', 'kotido', 'moroto', 'nabilatuk',
+'nakapiripirit', 'napak', 'kabale', 'kanungu', 'kisoro', 'rubanda', 'rukiga', 'rukungiri',
+'alebtong', 'amolatar', 'apac', 'dokolo', 'kole', 'kwania', 'lira city', 'lira', 'otuke', 'oyam',
+'buikwe', 'buvuma', 'kassanda', 'kayunga', 'kiboga', 'kyankwanzi', 'luwero', 'mityana', 'mubende',
+'mukono', 'nakaseke', 'nakasongola', 'bukomansimbi', 'butambala', 'gomba', 'kalangala', 'kalungu',
+'kyotera', 'lwengo', 'lyantonde', 'masaka city', 'masaka', 'mpigi', 'rakai', 'sembabule', 'wakiso',
+'amuria', 'bukedea', 'kaberamaido', 'kalaki', 'kapelebyong', 'katakwi', 'kumi', 'ngora', 'serere',
+'soroti city', 'soroti', 'bundibugyo', 'bunyangabu', 'fort portal city', 'kabarole', 'kamwenge',
+'kasese', 'kitagwenda', 'kyegegwa', 'kyenjojo', 'ntoroko', 'adjumani', 'arua city', 'arua', 'koboko',
+'madi-okollo', 'maracha', 'moyo', 'nebbi', 'obongi', 'pakwach', 'terego', 'yumbe', 'zombo'
+]
+    
+    with st.expander('See geojson'):
+        st.write(gdf.head())
+
+    if geojson_choice == 'subcounty':
+        district_choice = st.selectbox("Choose a District:", district_list)
+    
+
+
     st.write('Please upload the Data file')
     # Assuming upload_csv_data returns a DataFrame
     data = upload_csv_data()
@@ -105,7 +135,7 @@ def main():
     # Check if both geojson_choice has been made and data has been uploaded
     if geojson_choice and not data.empty and not gdf.empty:
         data, gdf = process_data(data, gdf)
-        
+                
         # Adding an empty option manually
         org_unit_options = [""] + list(data.columns)
         data_col_options = [""] + list(data.columns)
